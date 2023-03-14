@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Linq;
+using HLab.Erp.Core.Wpf.Lists.QueryLists;
 using HLab.Erp.Data;
 using HLab.Mvvm.Annotations;
 

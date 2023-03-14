@@ -10,7 +10,7 @@ using HLab.Notify.PropertyChanged;
 
 ////using System.Data.Model;
 
-namespace HLab.Erp.Core.Lists.QueryLists
+namespace HLab.Erp.Core.Wpf.Lists.QueryLists
 {
     public interface IQueryList
     {
@@ -36,8 +36,7 @@ namespace HLab.Erp.Core.Lists.QueryLists
             get => _viewMode.Get();
             set => _viewMode.Set(value);
         }
-
-        IProperty<Type> _viewMode = H<QueryListBase<T>>.Property<Type>(c => c.Default(typeof(ViewModeDefault)));
+        readonly IProperty<Type> _viewMode = H<QueryListBase<T>>.Property<Type>(c => c.Default(typeof(ViewModeDefault)));
 
         public abstract Type EntityType { get; }
         public IMvvmContext MvvmContext { get; set; }
@@ -46,17 +45,11 @@ namespace HLab.Erp.Core.Lists.QueryLists
         public object Model { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
     }
 
-
-
-
     public class QueryListBase<T, TVm, TThis> : QueryListBase<TVm>
         where TThis : QueryListBase<T, TVm, TThis>
         where TVm : IViewModel<T>//, INotifyPropertyChanged
         where T : class, IEntity, new()
-
-
     {
-        
         public IMvvmService Mvvm { get; set; }
         public IDataService Db { get; set; }
         public class CreateHelper : IDisposable
@@ -79,16 +72,16 @@ namespace HLab.Erp.Core.Lists.QueryLists
 
         class Filter
         {
-            public object Name { get; set; }
-            public Func<IQueryable<T>, IQueryable<T>> Func { get; set; }
-            public int Order { get; set; }
+            public object Name { get; init; }
+            public Func<IQueryable<T>, IQueryable<T>> Func { get; init; }
+            public int Order { get; init; }
         }
 
         class PostFilter
         {
-            public object Name { get; set; }
-            public Func<IEnumerable<T>, IEnumerable<T>> Func { get; set; }
-            public int Order { get; set; }
+            public object Name { get; init; }
+            public Func<IEnumerable<T>, IEnumerable<T>> Func { get; init; }
+            public int Order { get; init; }
         }
 
 
