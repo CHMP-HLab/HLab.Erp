@@ -4,10 +4,8 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Xml;
 using System.Xml.Linq;
 using HLab.Erp.Core.ListFilters;
-using HLab.Erp.Core.Wpf.ListFilters;
 using HLab.Notify.PropertyChanged;
 
 namespace HLab.Erp.Workflows

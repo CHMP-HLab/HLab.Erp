@@ -69,11 +69,9 @@ namespace HLab.Erp.Data
     public interface IDataService : IService, IDataProvider
     {
         IDataTransaction GetTransaction();
-        //T Get<T>();
+
         bool Any<T>(Expression<Func<T, bool>> expression)
             where T : class, IEntity;
-
-
 
         T FetchOne<T>(Expression<Func<T, bool>> expression) where T : class, IEntity;
         Task<T> FetchOneAsync<T>(Expression<Func<T, bool>> expression) where T : class, IEntity;
@@ -111,8 +109,11 @@ namespace HLab.Erp.Data
         IEnumerable<string> Connections { get; }
 
         //DbTransaction BeginTransaction();
-        void SetConfigureAction(Func<string> action);
+        void SetConfigureAction(Func<string,string,string> action);
+        void SetConnectionStringInteractive(string message);
 
         IAsyncEnumerable<string> GetDatabasesAsync(string host, string login, string password);
+
+        int ExecuteSql(string query);
     }
 }

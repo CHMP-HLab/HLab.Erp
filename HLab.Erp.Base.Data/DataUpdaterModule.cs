@@ -5,14 +5,17 @@ using System;
 
 namespace HLab.Erp.Base.Data;
 
-public abstract class DataUpdaterBootloader(IDataService data) : IBootloader
+public abstract class DataUpdaterModule(IDataService data) : IBootloader
 {
-    protected virtual string CurrentVersion => this.GetType().Assembly.GetName().Version.ToString();
+    protected virtual string CurrentVersion => this.GetType().Assembly.GetName().Version?.ToString()??"";
     protected virtual string CurrentModule => this.GetType().Assembly.GetName().Name;
 
     public void Load(IBootContext bootstrapper)
     {
         if(bootstrapper.WaitingForService(data)) return;
+    public void Load(IBootContext bootstrapper)
+    {
+        if(bootstrapper.WaitService(data)) return;
 
         var oldVersion = "";
         while (true)
@@ -34,6 +37,7 @@ public abstract class DataUpdaterBootloader(IDataService data) : IBootloader
                 }
             }
 
+            //oldest version might not have a DataVersion table
             version ??= data.Add<DataVersion>(v =>
             {
                 v.Module = CurrentModule;
@@ -44,6 +48,7 @@ public abstract class DataUpdaterBootloader(IDataService data) : IBootloader
 
             if (version.Version == CurrentVersion)
             {
+                return;
 #if DEBUG
                 try
                 {
@@ -66,13 +71,17 @@ public abstract class DataUpdaterBootloader(IDataService data) : IBootloader
 
     void Upgrade(string version)
     {
-        if (data is not DataService d) return;
-        
         ISqlBuilder builder = new SqlBuilderPostgres(CurrentModule,CurrentVersion);
 
         GetSqlUpdater(version, builder);
+        var update = $"BEGIN;\n{builder}\nCOMMIT;";
 
-        d.ExecuteSql($"BEGIN;\n{builder}\nCOMMIT;");
+        var n = data.ExecuteSql(update);
+        while (n < 0)
+        {
+            data.SetConnectionStringInteractive("{Please give database credentials with alter schema privilege}");
+            n = data.ExecuteSql(update);
+        }
     }
 
     protected virtual ISqlBuilder GetSqlUpdater(string version, ISqlBuilder builder) 
@@ -80,7 +89,6 @@ public abstract class DataUpdaterBootloader(IDataService data) : IBootloader
 
     void CreateDataVersion()
     {
-        if (data is not DataService d) return;
-        d.ExecuteSql($"BEGIN;\n{new SqlBuilderPostgres(CurrentModule,CurrentVersion).Table<DataVersion>().Create()}\nCOMMIT;");
+        data.ExecuteSql($"BEGIN;\n{new SqlBuilderPostgres(CurrentModule,CurrentVersion).Table<DataVersion>().Create()}\nCOMMIT;");
     }
 }
